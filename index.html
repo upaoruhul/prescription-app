@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ডিজিটাল প্রেসক্রিপশন</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#3F6B52">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="প্রেসক্রিপশন">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;600;700&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+:root{
+  --paper:#FBF8F1;
+  --paper-2:#F4EFE3;
+  --ink:#241F16;
+  --muted:#7A7061;
+  --line:#DAD0B8;
+  --green:#3F6B52;
+  --green-dark:#2C4D3A;
+  --rust:#9C4A2C;
+  --white:#FFFFFF;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  background:var(--paper-2);
+  font-family:'Hind Siliguri', sans-serif;
+  color:var(--ink);
+}
+.app{
+  max-width:900px;
+  margin:0 auto;
+  padding:18px 14px 60px;
+}
+.topbar{
+  display:flex;
+  gap:8px;
+  margin-bottom:16px;
+  align-items:stretch;
+}
+.tab{
+  flex:1;
+  text-align:center;
+  padding:11px 10px;
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:8px;
+  font-size:15px;
+  font-weight:600;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .15s ease;
+}
+.tab.active{
+  background:var(--green);
+  border-color:var(--green);
+  color:var(--white);
+}
+.lang-switch{
+  display:flex;
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+  flex-shrink:0;
+}
+.lang-btn{
+  padding:11px 12px;
+  background:var(--white);
+  border:none;
+  font-size:13px;
+  font-weight:700;
+  color:var(--muted);
+  cursor:pointer;
+}
+.lang-btn.active{
+  background:var(--green-dark);
+  color:var(--white);
+}
+
+.sheet{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+/* ---- Header / letterhead ---- */
+.letterhead{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  padding:20px 22px 16px;
+}
+.logo-box{
+  width:64px;
+  height:64px;
+  flex-shrink:0;
+  border-radius:50%;
+  border:1.5px dashed var(--line);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  cursor:pointer;
+  background:var(--white);
+}
+.logo-box img{width:100%;height:100%;object-fit:cover;}
+.logo-box span{font-size:10px;color:var(--muted);text-align:center;padding:2px;line-height:1.3;}
+.doc-fields{flex:1;min-width:0;}
+.doc-name{
+  font-family:'Noto Serif Bengali', serif;
+  font-weight:700;
+  font-size:21px;
+  border:none;
+  background:transparent;
+  width:100%;
+  color:var(--green-dark);
+  padding:2px 0;
+  border-bottom:1px solid transparent;
+}
+.doc-name:focus{outline:none;border-bottom:1px solid var(--green);}
+.doc-title{
+  font-family:'Hind Siliguri', sans-serif;
+  font-size:12.5px;
+  font-style:italic;
+  color:var(--muted);
+  border:none;
+  background:transparent;
+  width:100%;
+  padding:1px 0;
+  border-bottom:1px solid transparent;
+}
+.doc-title:focus{outline:none;border-bottom:1px solid var(--line);}
+.doc-chamber{
+  font-family:'Hind Siliguri', sans-serif;
+  font-weight:700;
+  font-size:13.5px;
+  color:var(--ink);
+  border:none;
+  background:transparent;
+  width:100%;
+  padding:3px 0 1px;
+  border-bottom:1px solid transparent;
+}
+.doc-chamber:focus{outline:none;border-bottom:1px solid var(--line);}
+.doc-sub-lines{
+  margin-top:3px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.doc-sub-lines input{
+  border:none;
+  background:transparent;
+  font-size:12px;
+  color:var(--muted);
+  padding:2px 0;
+  border-bottom:1px solid transparent;
+  width:100%;
+}
+.doc-sub-lines input:focus{outline:none;border-bottom:1px solid var(--line);}
+.rx-mark{
+  font-family:'Noto Serif Bengali', serif;
+  font-size:30px;
+  color:var(--green);
+  font-weight:700;
+  flex-shrink:0;
+}
+.rule{height:2px;background:linear-gradient(90deg,var(--green) 0%, var(--line) 100%);}
+
+/* ---- Patient row ---- */
+.patient-row{
+  display:grid;
+  grid-template-columns:1.6fr .7fr 1fr 1fr;
+  gap:10px;
+  padding:16px 22px;
+  border-bottom:1px solid var(--line);
+  background:var(--paper-2);
+}
+.field label{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin-bottom:3px;
+  letter-spacing:.2px;
+}
+.field input, .field textarea{
+  width:100%;
+  border:1px solid var(--line);
+  background:var(--white);
+  border-radius:6px;
+  padding:8px 9px;
+  font-family:'Hind Siliguri',sans-serif;
+  font-size:14.5px;
+  color:var(--ink);
+}
+.field input:focus, .field textarea:focus{
+  outline:none;
+  border-color:var(--green);
+}
+
+/* ---- Two column body ---- */
+.body-grid{
+  display:grid;
+  grid-template-columns:1fr 1.25fr;
+  gap:0;
+}
+.col{
+  padding:18px 20px;
+}
+.col-left{border-right:1px solid var(--line);}
+.col-right{display:flex;flex-direction:column;}
+.section-title{
+  font-size:12.5px;
+  font-weight:600;
+  color:var(--green-dark);
+  margin:0 0 8px;
+}
+.section-title.gap{margin-top:18px;}
+textarea.big{min-height:88px; resize:vertical;}
+textarea.small{min-height:64px; resize:vertical;}
+
+.toggle-row{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin:14px 0 8px;
+  font-size:13px;
+  color:var(--green-dark);
+  font-weight:600;
+}
+.toggle-row input{width:15px;height:15px;accent-color:var(--green);}
+
+.med-header{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  margin-bottom:10px;
+}
+.med-header .big-rx{
+  font-family:'Noto Serif Bengali', serif;
+  font-size:26px;
+  color:var(--green);
+  line-height:1;
+}
+.med-row{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:8px;
+  margin-bottom:8px;
+  align-items:start;
+}
+.med-row input{
+  border:1px solid var(--line);
+  background:var(--white);
+  border-radius:6px;
+  padding:8px 9px;
+  font-size:14px;
+  font-family:'Hind Siliguri',sans-serif;
+  width:100%;
+}
+.med-row input:focus{outline:none;border-color:var(--green);}
+.med-num{
+  width:20px;
+  padding-top:9px;
+  font-size:13px;
+  color:var(--muted);
+  text-align:center;
+  flex-shrink:0;
+}
+.med-line{display:flex;gap:6px;align-items:flex-start;}
+.rm-btn{
+  border:none;
+  background:transparent;
+  color:var(--rust);
+  font-size:18px;
+  cursor:pointer;
+  line-height:1;
+  padding:6px 4px;
+}
+.add-med{
+  margin-top:4px;
+  border:1px dashed var(--green);
+  background:transparent;
+  color:var(--green-dark);
+  font-size:13.5px;
+  font-weight:600;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+  width:100%;
+}
+.add-med:hover{background:var(--white);}
+
+/* ---- signature box (form) ---- */
+.sig-block{margin-top:auto; padding-top:18px;}
+.sig-box{
+  width:150px;
+  height:70px;
+  border:1.5px dashed var(--line);
+  border-radius:6px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  background:var(--white);
+  overflow:hidden;
+}
+.sig-box img{max-width:100%;max-height:100%;object-fit:contain;}
+.sig-box span{font-size:10.5px;color:var(--muted);text-align:center;padding:4px;line-height:1.3;}
+.sig-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+
+/* ---- Advice section ---- */
+.advice-body{
+  padding:0 22px 4px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.advice-body .field label{color:var(--green-dark);}
+.advice-body .field:nth-child(2) label{color:var(--rust);}
+
+.followup-wrap{padding:0 22px;}
+.followup-body{
+  padding:0 22px 18px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+
+/* ---- Footer actions ---- */
+.actions{
+  display:flex;
+  gap:10px;
+  padding:16px 22px 20px;
+  border-top:1px solid var(--line);
+}
+.btn{
+  flex:1;
+  padding:12px;
+  border-radius:7px;
+  font-size:15px;
+  font-weight:600;
+  cursor:pointer;
+  border:1px solid var(--line);
+  background:var(--white);
+  color:var(--ink);
+}
+.btn.primary{
+  background:var(--green);
+  border-color:var(--green);
+  color:var(--white);
+}
+.btn.primary:disabled{opacity:.5;cursor:not-allowed;}
+.error-msg{
+  color:var(--rust);
+  font-size:13px;
+  padding:0 22px 10px;
+}
+
+/* ---- Gallery ---- */
+.gallery-empty{
+  padding:50px 20px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14.5px;
+}
+.gallery-list{padding:14px;}
+.gcard{
+  background:var(--white);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:12px 14px;
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+}
+.gcard:active{background:var(--paper-2);}
+.gcard-main{flex:1;min-width:0;}
+.gcard-name{font-weight:600;font-size:15px;color:var(--green-dark);}
+.gcard-meta{font-size:12.5px;color:var(--muted);margin-top:2px;}
+.gcard-del{
+  border:none;background:transparent;color:var(--rust);font-size:18px;cursor:pointer;padding:4px 6px;
+}
+
+/* ---- Saved / print view ---- */
+.print-sheet{padding:22px;}
+.ps-header{display:flex;align-items:flex-start;gap:14px;border-bottom:2px solid var(--green);padding-bottom:12px;margin-bottom:14px;}
+.ps-logo{width:56px;height:56px;border-radius:50%;overflow:hidden;flex-shrink:0;border:1px solid var(--line);}
+.ps-logo img{width:100%;height:100%;object-fit:cover;}
+.ps-doc-name{font-family:'Noto Serif Bengali',serif;font-weight:700;font-size:19px;color:var(--green-dark);}
+.ps-doc-title{font-size:12px;font-style:italic;color:var(--muted);margin-top:1px;}
+.ps-doc-chamber{font-size:13px;font-weight:700;color:var(--ink);margin-top:3px;}
+.ps-doc-sub{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.55;}
+.ps-patient{
+  display:grid;grid-template-columns:1.6fr .7fr 1fr 1fr;gap:10px;
+  background:var(--paper-2);border:1px solid var(--line);border-radius:6px;
+  padding:10px 12px;margin-bottom:16px;font-size:13.5px;
+}
+.ps-patient div span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:2px;}
+.ps-body{display:grid;grid-template-columns:1fr 1.25fr;gap:0;border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+.ps-col{padding:14px 16px;}
+.ps-col-left{border-right:1px solid var(--line);}
+.ps-col-right{display:flex;flex-direction:column;}
+.ps-h{font-size:12px;font-weight:700;color:var(--green-dark);margin:0 0 6px;}
+.ps-h.gap{margin-top:16px;}
+.ps-text{font-size:13.5px;line-height:1.6;white-space:pre-wrap;color:var(--ink);min-height:18px;}
+.ps-rx{font-family:'Noto Serif Bengali',serif;font-size:24px;color:var(--green);margin-bottom:8px;display:block;}
+.ps-med{display:flex;gap:8px;margin-bottom:9px;font-size:13.5px;}
+.ps-med b{color:var(--ink);}
+.ps-med .num{color:var(--muted);width:16px;flex-shrink:0;}
+.ps-med .usage{color:var(--muted);display:block;font-size:12.5px;margin-top:1px;}
+.ps-sign-block{margin-top:auto;padding-top:20px;text-align:right;}
+.ps-sign-img{max-width:130px;max-height:55px;object-fit:contain;margin-left:auto;display:block;}
+.ps-sign-line{border-top:1px solid var(--ink);width:150px;margin:4px 0 6px auto;}
+.ps-sign-name{font-size:13px;font-weight:700;color:var(--ink);}
+.ps-sign-title{font-size:11.5px;color:var(--muted);font-style:italic;}
+.ps-sign-address{font-size:11px;color:var(--muted);line-height:1.5;margin-top:2px;}
+.ps-sign-date{font-size:11.5px;color:var(--muted);margin-top:4px;}
+.ps-advice{margin-top:16px;border:1px solid var(--line);border-radius:6px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;}
+.ps-advice > div{padding:12px 14px;}
+.ps-advice .do{border-right:1px solid var(--line);}
+.ps-advice .ah{font-size:12px;font-weight:700;margin-bottom:5px;}
+.ps-advice .do .ah{color:var(--green-dark);}
+.ps-advice .dont .ah{color:var(--rust);}
+.ps-followup{
+  margin-top:14px;border:1px solid var(--green);border-radius:6px;
+  padding:10px 14px;background:var(--paper-2);
+  display:flex;gap:20px;align-items:center;
+}
+.ps-followup .ah{font-size:12px;font-weight:700;color:var(--green-dark);margin-bottom:2px;}
+.ps-followup-val{font-size:14px;font-weight:600;color:var(--ink);}
+.ps-footer-actions{display:flex;gap:10px;padding:16px 22px;flex-wrap:wrap;}
+
+.toast{
+  position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+  background:var(--green-dark);color:#fff;padding:10px 18px;border-radius:20px;
+  font-size:13.5px;box-shadow:0 4px 14px rgba(0,0,0,.2);z-index:50;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
+}
+.toast.show{opacity:1;}
+
+@media (max-width:620px){
+  .patient-row{grid-template-columns:1fr 1fr;}
+  .body-grid{grid-template-columns:1fr;}
+  .col-left{border-right:none;border-bottom:1px solid var(--line);}
+  .advice-body{grid-template-columns:1fr;}
+  .followup-body{grid-template-columns:1fr;}
+  .ps-patient{grid-template-columns:1fr 1fr;}
+  .ps-body{grid-template-columns:1fr;}
+  .ps-col-left{border-right:none;border-bottom:1px solid var(--line);}
+  .ps-advice{grid-template-columns:1fr;}
+  .ps-advice .do{border-right:none;border-bottom:1px solid var(--line);}
+  .ps-followup{flex-direction:column;align-items:flex-start;gap:6px;}
+}
+
+@media print{
+  body *{visibility:hidden;}
+  .print-area, .print-area *{visibility:visible;}
+  .print-area{position:absolute;top:0;left:0;width:100%;margin:0;padding:0;}
+  .no-print{display:none !important;}
+  .app{max-width:100%;padding:0;}
+  .sheet{border:none;border-radius:0;}
+}
+</style>
+</head>
+<body>
+<div class="app" id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const $ = (sel, root=document) => root.querySelector(sel);
+const app = $('#app');
+const toastEl = $('#toast');
+
+function showToast(msg){
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  setTimeout(()=>toastEl.classList.remove('show'), 2200);
+}
+
+function uid(){ return 'rx_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+function todayISO(){
+  const d = new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function formatDateBn(iso){
+  if(!iso) return '';
+  const parts = iso.split('-');
+  if(parts.length!==3) return iso;
+  return parts[2]+'-'+parts[1]+'-'+parts[0];
+}
+
+// ---------- translations ----------
+const L = {
+  bn: {
+    tabForm:'নতুন প্রেসক্রিপশন', tabGallery:'গ্যালারি',
+    logoAdd:'লোগো\nযোগ করুন',
+    doctorNamePh:'ডাক্তারের নাম', titlePh:'পদবী / ডিগ্রি', chamberNamePh:'চেম্বারের নাম',
+    addressPh:'চেম্বারের ঠিকানা', address2Ph:'ঠিকানা (চলমান লাইন)', regNoPh:'রেজিস্ট্রেশন নম্বার',
+    mobile1Ph:'মোবাইল নম্বর ১', mobile2Ph:'মোবাইল নম্বর ২ (ঐচ্ছিক)',
+    patientName:'রোগীর নাম', patientNameReq:'রোগীর নাম *', age:'বয়স', date:'তারিখ', patientId:'রোগী আইডি',
+    complaints:'সমস্যা / উপসর্গ', complaintsPh:'রোগীর সমস্যা লিখুন...',
+    addTests:'প্রয়োজনীয় টেস্ট যোগ করুন', testsPh:'প্রয়োজনীয় টেস্ট লিখুন...',
+    medicines:'ঔষধ', medNamePh:'ঔষধের নাম', medUsagePh:'ব্যবহার বিধি', addMed:'+ ঔষধ যোগ করুন',
+    signature:'স্বাক্ষর', sigHint:'PNG ফরম্যাটে ছবি আপলোড করুন', sigUploadPrompt:'স্বাক্ষরের PNG ছবি আপলোড করুন',
+    addAdvice:'করণীয় ও বর্জনীয় যোগ করুন', doTitle:'করণীয়', dontTitle:'বর্জনীয়', doPh:'যা করতে হবে...', dontPh:'যা বর্জন করতে হবে...',
+    addFollowup:'পরবর্তী সাক্ষাতের তারিখ ও সময় যোগ করুন', followupDate:'তারিখ', followupTime:'সময়', followupTitle:'পরবর্তী সাক্ষাৎ',
+    reset:'রিসেট', submit:'সংরক্ষণ করুন', saving:'সংরক্ষণ হচ্ছে...', nameRequired:'রোগীর নাম আবশ্যক',
+    galleryEmpty:'এখনো কোনো প্রেসক্রিপশন সংরক্ষিত হয়নি।',
+    ageLbl:'বয়স', dateLbl:'তারিখ', idLbl:'আইডি',
+    back:'গ্যালারি', newRx:'নতুন প্রেসক্রিপশন', print:'প্রিন্ট করুন', jpg:'JPG ডাউনলোড', pdf:'PDF ডাউনলোড',
+    savedToast:'প্রেসক্রিপশন গ্যালারিতে সংরক্ষিত হয়েছে', deleteConfirm:'এই প্রেসক্রিপশনটি মুছে ফেলতে চান?',
+    pngOnly:'অনুগ্রহ করে PNG ফরম্যাটের ছবি আপলোড করুন', downloadFail:'ডাউনলোড ব্যর্থ হয়েছে, আবার চেষ্টা করুন',
+    jpgDone:'JPG ডাউনলোড হয়েছে', pdfDone:'PDF ডাউনলোড হয়েছে',
+    psPatientName:'রোগীর নাম', psAge:'বয়স', psDate:'তারিখ', psId:'রোগী আইডি', psTests:'পরীক্ষা'
+  },
+  en: {
+    tabForm:'New Prescription', tabGallery:'Gallery',
+    logoAdd:'Add\nLogo',
+    doctorNamePh:"Doctor's name", titlePh:'Title / Degree', chamberNamePh:'Chamber name',
+    addressPh:'Chamber address', address2Ph:'Address (continued)', regNoPh:'Registration number',
+    mobile1Ph:'Mobile number 1', mobile2Ph:'Mobile number 2 (optional)',
+    patientName:'Patient name', patientNameReq:'Patient name *', age:'Age', date:'Date', patientId:'Patient ID',
+    complaints:'Complaints', complaintsPh:'Write patient complaints...',
+    addTests:'Add required tests', testsPh:'Write required tests...',
+    medicines:'Medicines', medNamePh:'Medicine name', medUsagePh:'Usage instructions', addMed:'+ Add Medicine',
+    signature:'Signature', sigHint:'Upload a PNG image', sigUploadPrompt:'Upload signature (PNG)',
+    addAdvice:'Add Do\u2019s & Don\u2019ts', doTitle:"Do's", dontTitle:"Don'ts", doPh:'What to do...', dontPh:'What to avoid...',
+    addFollowup:'Add next visit date & time', followupDate:'Date', followupTime:'Time', followupTitle:'Next Visit',
+    reset:'Reset', submit:'Save', saving:'Saving...', nameRequired:'Patient name is required',
+    galleryEmpty:'No prescriptions saved yet.',
+    ageLbl:'Age', dateLbl:'Date', idLbl:'ID',
+    back:'Gallery', newRx:'New Prescription', print:'Print', jpg:'Download JPG', pdf:'Download PDF',
+    savedToast:'Prescription saved to gallery', deleteConfirm:'Delete this prescription?',
+    pngOnly:'Please upload a PNG image', downloadFail:'Download failed, try again',
+    jpgDone:'JPG downloaded', pdfDone:'PDF downloaded',
+    psPatientName:'Patient Name', psAge:'Age', psDate:'Date', psId:'Patient ID', psTests:'Tests'
+  }
+};
+let lang = 'bn';
+function T(){ return L[lang]; }
+
+// ---------- state ----------
+let doctorInfo = {
+  name:'', title:'', chamberName:'', regNo:'',
+  address:'', addressLine2:'', mobile1:'', mobile2:'',
+  logo:'', signature:''
+};
+let prescriptions = [];
+let view = 'form'; // 'form' | 'gallery' | 'view'
+let activeRxId = null;
+let saving = false;
+
+let form = freshForm();
+function freshForm(){
+  return {
+    patientName:'', age:'', date:todayISO(), patientId:'',
+    complaints:'', testsEnabled:false, tests:'',
+    medicines:[{name:'', usage:''}],
+    adviceEnabled:false, adviceDo:'', adviceDont:'',
+    followupEnabled:false, followupDate:'', followupTime:''
+  };
+}
+
+// ---------- storage (plain browser localStorage — works offline, no server needed) ----------
+async function loadAll(){
+  try{
+    const v = localStorage.getItem('doctor-info');
+    if(v) doctorInfo = Object.assign({}, doctorInfo, JSON.parse(v));
+  }catch(e){}
+  try{
+    const v = localStorage.getItem('prescriptions-all');
+    if(v) prescriptions = JSON.parse(v);
+  }catch(e){}
+  try{
+    const v = localStorage.getItem('app-lang');
+    if(v) lang = v;
+  }catch(e){}
+  render();
+}
+async function saveDoctorInfo(){
+  try{ localStorage.setItem('doctor-info', JSON.stringify(doctorInfo)); }
+  catch(e){ console.error('doctor-info save failed', e); }
+}
+async function savePrescriptions(){
+  try{ localStorage.setItem('prescriptions-all', JSON.stringify(prescriptions)); }
+  catch(e){ console.error('prescriptions save failed', e); }
+}
+async function saveLang(){
+  try{ localStorage.setItem('app-lang', lang); }catch(e){}
+}
+
+// ---------- render ----------
+function render(){
+  if(view==='form') renderForm();
+  else if(view==='gallery') renderGallery();
+  else if(view==='view') renderPrintView();
+}
+
+function renderTopbar(){
+  const t = T();
+  return `
+  <div class="topbar no-print">
+    <div class="tab ${view==='form'?'active':''}" data-nav="form">${t.tabForm}</div>
+    <div class="tab ${view==='gallery'?'active':''}" data-nav="gallery">${t.tabGallery} (${prescriptions.length})</div>
+    <div class="lang-switch">
+      <button class="lang-btn ${lang==='bn'?'active':''}" data-lang="bn">বাং</button>
+      <button class="lang-btn ${lang==='en'?'active':''}" data-lang="en">EN</button>
+    </div>
+  </div>`;
+}
+function bindTopbar(){
+  document.querySelectorAll('[data-nav]').forEach(t=>{ t.onclick = ()=>{ view = t.dataset.nav; render(); }; });
+  document.querySelectorAll('[data-lang]').forEach(b=>{
+    b.onclick = ()=>{ lang = b.dataset.lang; saveLang(); render(); };
+  });
+}
+
+function renderForm(){
+  const t = T();
+  const m = form.medicines;
+  app.innerHTML = `
+    ${renderTopbar()}
+    <div class="sheet">
+      <div class="letterhead">
+        <div class="logo-box" id="logoBox">
+          ${doctorInfo.logo ? `<img src="${doctorInfo.logo}">` : `<span>${t.logoAdd.replace('\n','<br>')}</span>`}
+        </div>
+        <div class="doc-fields">
+          <input class="doc-name" id="docName" value="${escAttr(doctorInfo.name)}" placeholder="${escAttr(t.doctorNamePh)}">
+          <input class="doc-title" id="docTitle" value="${escAttr(doctorInfo.title)}" placeholder="${escAttr(t.titlePh)}">
+          <input class="doc-chamber" id="docChamber" value="${escAttr(doctorInfo.chamberName)}" placeholder="${escAttr(t.chamberNamePh)}">
+          <div class="doc-sub-lines">
+            <input id="docAddress" value="${escAttr(doctorInfo.address)}" placeholder="${escAttr(t.addressPh)}">
+            <input id="docAddress2" value="${escAttr(doctorInfo.addressLine2)}" placeholder="${escAttr(t.address2Ph)}">
+            <input id="docRegNo" value="${escAttr(doctorInfo.regNo)}" placeholder="${escAttr(t.regNoPh)}">
+            <input id="docMobile1" value="${escAttr(doctorInfo.mobile1)}" placeholder="${escAttr(t.mobile1Ph)}">
+            <input id="docMobile2" value="${escAttr(doctorInfo.mobile2)}" placeholder="${escAttr(t.mobile2Ph)}">
+          </div>
+        </div>
+        <div class="rx-mark">℞</div>
+      </div>
+      <div class="rule"></div>
+
+      <div class="patient-row">
+        <div class="field"><label>${t.patientNameReq}</label><input id="patientName" value="${escAttr(form.patientName)}" placeholder="${escAttr(t.patientName)}"></div>
+        <div class="field"><label>${t.age}</label><input id="age" value="${escAttr(form.age)}" placeholder="${escAttr(t.age)}"></div>
+        <div class="field"><label>${t.date}</label><input id="date" type="date" value="${form.date}"></div>
+        <div class="field"><label>${t.patientId}</label><input id="patientId" value="${escAttr(form.patientId)}" placeholder="${escAttr(t.patientId)}"></div>
+      </div>
+
+      <div class="body-grid">
+        <div class="col col-left">
+          <p class="section-title">${t.complaints}</p>
+          <div class="field"><textarea class="big" id="complaints" placeholder="${escAttr(t.complaintsPh)}">${escHtml(form.complaints)}</textarea></div>
+
+          <div class="toggle-row">
+            <input type="checkbox" id="testsToggle" ${form.testsEnabled?'checked':''}>
+            <label for="testsToggle">${t.addTests}</label>
+          </div>
+          ${form.testsEnabled ? `
+          <div class="field"><textarea class="small" id="tests" placeholder="${escAttr(t.testsPh)}">${escHtml(form.tests)}</textarea></div>
+          ` : ''}
+        </div>
+        <div class="col col-right">
+          <div class="med-header"><span class="big-rx">℞</span><p class="section-title" style="margin:0;">${t.medicines}</p></div>
+          <div id="medList">
+            ${m.map((med,i)=>`
+              <div class="med-line">
+                <div class="med-num">${i+1}.</div>
+                <div class="med-row">
+                  <input data-med="name" data-idx="${i}" value="${escAttr(med.name)}" placeholder="${escAttr(t.medNamePh)}">
+                  <input data-med="usage" data-idx="${i}" value="${escAttr(med.usage)}" placeholder="${escAttr(t.medUsagePh)}">
+                  <button class="rm-btn" data-rm="${i}" ${m.length===1?'style="visibility:hidden"':''}>×</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+          <button class="add-med" id="addMed">${t.addMed}</button>
+
+          <div class="sig-block">
+            <p class="section-title">${t.signature}</p>
+            <div class="sig-box" id="sigBox">
+              ${doctorInfo.signature ? `<img src="${doctorInfo.signature}">` : `<span>${t.sigUploadPrompt}</span>`}
+            </div>
+            <div class="sig-hint">${t.sigHint}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="followup-wrap">
+        <div class="toggle-row" style="border-top:1px solid var(--line);padding-top:14px;">
+          <input type="checkbox" id="adviceToggle" ${form.adviceEnabled?'checked':''}>
+          <label for="adviceToggle">${t.addAdvice}</label>
+        </div>
+      </div>
+      ${form.adviceEnabled ? `
+      <div class="advice-body">
+        <div class="field"><label>${t.doTitle}</label><textarea class="small" id="adviceDo" placeholder="${escAttr(t.doPh)}">${escHtml(form.adviceDo)}</textarea></div>
+        <div class="field"><label>${t.dontTitle}</label><textarea class="small" id="adviceDont" placeholder="${escAttr(t.dontPh)}">${escHtml(form.adviceDont)}</textarea></div>
+      </div>` : ''}
+
+      <div class="followup-wrap">
+        <div class="toggle-row" style="border-top:1px solid var(--line);padding-top:14px;">
+          <input type="checkbox" id="followupToggle" ${form.followupEnabled?'checked':''}>
+          <label for="followupToggle">${t.addFollowup}</label>
+        </div>
+      </div>
+      ${form.followupEnabled ? `
+      <div class="followup-body">
+        <div class="field"><label>${t.followupDate}</label><input type="date" id="followupDate" value="${form.followupDate}"></div>
+        <div class="field"><label>${t.followupTime}</label><input type="time" id="followupTime" value="${form.followupTime}"></div>
+      </div>` : ''}
+
+      ${form._error ? `<div class="error-msg">${form._error}</div>` : ''}
+      <div class="actions">
+        <button class="btn" id="resetBtn">${t.reset}</button>
+        <button class="btn primary" id="submitBtn" ${saving?'disabled':''}>${saving?t.saving:t.submit}</button>
+      </div>
+    </div>
+  `;
+  bindFormEvents();
+}
+
+function bindFormEvents(){
+  const t = T();
+  $('#logoBox').onclick = ()=>{
+    const inp = document.createElement('input');
+    inp.type='file'; inp.accept='image/*';
+    inp.onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{ doctorInfo.logo = reader.result; saveDoctorInfo(); render(); };
+      reader.readAsDataURL(file);
+    };
+    inp.click();
+  };
+  $('#sigBox').onclick = ()=>{
+    const inp = document.createElement('input');
+    inp.type='file'; inp.accept='image/png';
+    inp.onchange = (e)=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      if(file.type !== 'image/png'){
+        showToast(t.pngOnly);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = ()=>{ doctorInfo.signature = reader.result; saveDoctorInfo(); render(); };
+      reader.readAsDataURL(file);
+    };
+    inp.click();
+  };
+
+  $('#docName').oninput = (e)=>{ doctorInfo.name = e.target.value; };
+  $('#docName').onblur = saveDoctorInfo;
+  $('#docTitle').oninput = (e)=>{ doctorInfo.title = e.target.value; };
+  $('#docTitle').onblur = saveDoctorInfo;
+  $('#docChamber').oninput = (e)=>{ doctorInfo.chamberName = e.target.value; };
+  $('#docChamber').onblur = saveDoctorInfo;
+  $('#docAddress').oninput = (e)=>{ doctorInfo.address = e.target.value; };
+  $('#docAddress').onblur = saveDoctorInfo;
+  $('#docAddress2').oninput = (e)=>{ doctorInfo.addressLine2 = e.target.value; };
+  $('#docAddress2').onblur = saveDoctorInfo;
+  $('#docRegNo').oninput = (e)=>{ doctorInfo.regNo = e.target.value; };
+  $('#docRegNo').onblur = saveDoctorInfo;
+  $('#docMobile1').oninput = (e)=>{ doctorInfo.mobile1 = e.target.value; };
+  $('#docMobile1').onblur = saveDoctorInfo;
+  $('#docMobile2').oninput = (e)=>{ doctorInfo.mobile2 = e.target.value; };
+  $('#docMobile2').onblur = saveDoctorInfo;
+
+  $('#patientName').oninput = (e)=>{ form.patientName = e.target.value; };
+  $('#age').oninput = (e)=>{ form.age = e.target.value; };
+  $('#date').oninput = (e)=>{ form.date = e.target.value; };
+  $('#patientId').oninput = (e)=>{ form.patientId = e.target.value; };
+  $('#complaints').oninput = (e)=>{ form.complaints = e.target.value; };
+
+  $('#testsToggle').onchange = (e)=>{ form.testsEnabled = e.target.checked; render(); };
+  if($('#tests')) $('#tests').oninput = (e)=>{ form.tests = e.target.value; };
+
+  document.querySelectorAll('[data-med]').forEach(inp=>{
+    inp.oninput = (e)=>{
+      const idx = +e.target.dataset.idx;
+      const key = e.target.dataset.med;
+      form.medicines[idx][key] = e.target.value;
+    };
+  });
+  document.querySelectorAll('[data-rm]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const idx = +btn.dataset.rm;
+      if(form.medicines.length>1){ form.medicines.splice(idx,1); render(); }
+    };
+  });
+  $('#addMed').onclick = ()=>{ form.medicines.push({name:'',usage:''}); render(); };
+
+  $('#adviceToggle').onchange = (e)=>{ form.adviceEnabled = e.target.checked; render(); };
+  if($('#adviceDo')) $('#adviceDo').oninput = (e)=>{ form.adviceDo = e.target.value; };
+  if($('#adviceDont')) $('#adviceDont').oninput = (e)=>{ form.adviceDont = e.target.value; };
+
+  $('#followupToggle').onchange = (e)=>{ form.followupEnabled = e.target.checked; render(); };
+  if($('#followupDate')) $('#followupDate').oninput = (e)=>{ form.followupDate = e.target.value; };
+  if($('#followupTime')) $('#followupTime').oninput = (e)=>{ form.followupTime = e.target.value; };
+
+  $('#resetBtn').onclick = ()=>{ form = freshForm(); render(); };
+  $('#submitBtn').onclick = submitForm;
+
+  bindTopbar();
+}
+
+async function submitForm(){
+  const t = T();
+  if(!form.patientName.trim()){
+    form._error = t.nameRequired;
+    render();
+    return;
+  }
+  form._error = '';
+  saving = true; render();
+
+  const cleanMeds = form.medicines.filter(med=>med.name.trim()!=='' || med.usage.trim()!=='');
+  const rx = {
+    id: uid(),
+    createdAt: new Date().toISOString(),
+    lang: lang,
+    patientName: form.patientName.trim(),
+    age: form.age.trim(),
+    date: form.date || todayISO(),
+    patientId: form.patientId.trim(),
+    complaints: form.complaints.trim(),
+    testsEnabled: form.testsEnabled,
+    tests: form.tests.trim(),
+    medicines: cleanMeds.length ? cleanMeds : [],
+    adviceEnabled: form.adviceEnabled,
+    adviceDo: form.adviceDo.trim(),
+    adviceDont: form.adviceDont.trim(),
+    followupEnabled: form.followupEnabled,
+    followupDate: form.followupDate,
+    followupTime: form.followupTime,
+    doctor: {
+      name: doctorInfo.name, title: doctorInfo.title, chamberName: doctorInfo.chamberName, regNo: doctorInfo.regNo,
+      address: doctorInfo.address, addressLine2: doctorInfo.addressLine2,
+      mobile1: doctorInfo.mobile1, mobile2: doctorInfo.mobile2,
+      logo: doctorInfo.logo, signature: doctorInfo.signature
+    }
+  };
+  prescriptions.unshift(rx);
+  await savePrescriptions();
+  saving = false;
+  activeRxId = rx.id;
+  form = freshForm();
+  view = 'view';
+  render();
+  showToast(t.savedToast);
+}
+
+function renderGallery(){
+  const t = T();
+  app.innerHTML = `
+    ${renderTopbar()}
+    <div class="sheet">
+      ${prescriptions.length===0 ? `
+        <div class="gallery-empty">${t.galleryEmpty}</div>
+      ` : `
+        <div class="gallery-list">
+          ${prescriptions.map(rx=>`
+            <div class="gcard" data-open="${rx.id}">
+              <div class="gcard-main">
+                <div class="gcard-name">${escHtml(rx.patientName)}</div>
+                <div class="gcard-meta">${t.ageLbl}: ${escHtml(rx.age||'-')} · ${t.dateLbl}: ${formatDateBn(rx.date)} ${rx.patientId ? '· '+t.idLbl+': '+escHtml(rx.patientId) : ''}</div>
+              </div>
+              <button class="gcard-del" data-del="${rx.id}">🗑</button>
+            </div>
+          `).join('')}
+        </div>
+      `}
+    </div>
+  `;
+  bindTopbar();
+  document.querySelectorAll('[data-open]').forEach(c=>{
+    c.onclick = (e)=>{
+      if(e.target.closest('[data-del]')) return;
+      activeRxId = c.dataset.open; view='view'; render();
+    };
+  });
+  document.querySelectorAll('[data-del]').forEach(b=>{
+    b.onclick = async (e)=>{
+      e.stopPropagation();
+      const id = b.dataset.del;
+      if(confirm(t.deleteConfirm)){
+        prescriptions = prescriptions.filter(r=>r.id!==id);
+        await savePrescriptions();
+        render();
+      }
+    };
+  });
+}
+
+function renderPrintView(){
+  const rx = prescriptions.find(r=>r.id===activeRxId);
+  if(!rx){ view='gallery'; render(); return; }
+  const t = L[rx.lang || lang];
+  const addrLines = [rx.doctor.address, rx.doctor.addressLine2].filter(Boolean).join(', ');
+  const mobLines = [rx.doctor.mobile1, rx.doctor.mobile2].filter(Boolean).join(' · ');
+  const regLine = rx.doctor.regNo ? (rx.lang==='en' ? 'Reg. No: ' : 'রেজিঃ নং: ') + rx.doctor.regNo : '';
+  app.innerHTML = `
+    ${renderTopbar()}
+    <div class="sheet print-area">
+      <div class="print-sheet">
+        <div class="ps-header">
+          ${rx.doctor.logo ? `<div class="ps-logo"><img src="${rx.doctor.logo}"></div>` : ''}
+          <div>
+            <div class="ps-doc-name">${escHtml(rx.doctor.name)}</div>
+            ${rx.doctor.title ? `<div class="ps-doc-title">${escHtml(rx.doctor.title)}</div>` : ''}
+            ${rx.doctor.chamberName ? `<div class="ps-doc-chamber">${escHtml(rx.doctor.chamberName)}</div>` : ''}
+            <div class="ps-doc-sub">${escHtml(addrLines)}${mobLines ? '<br>'+escHtml(mobLines) : ''}${regLine ? '<br>'+escHtml(regLine) : ''}</div>
+          </div>
+        </div>
+
+        <div class="ps-patient">
+          <div><span>${t.psPatientName}</span>${escHtml(rx.patientName)}</div>
+          <div><span>${t.psAge}</span>${escHtml(rx.age||'-')}</div>
+          <div><span>${t.psDate}</span>${formatDateBn(rx.date)}</div>
+          <div><span>${t.psId}</span>${escHtml(rx.patientId||'-')}</div>
+        </div>
+
+        <div class="ps-body">
+          <div class="ps-col ps-col-left">
+            <p class="ps-h">${t.complaints}</p>
+            <div class="ps-text">${escHtml(rx.complaints) || '—'}</div>
+            ${rx.testsEnabled ? `
+            <p class="ps-h gap">${t.psTests}</p>
+            <div class="ps-text">${escHtml(rx.tests) || '—'}</div>
+            ` : ''}
+          </div>
+          <div class="ps-col ps-col-right">
+            <div>
+              <span class="ps-rx">℞</span>
+              ${rx.medicines.length===0 ? '<div class="ps-text">—</div>' : rx.medicines.map((med,i)=>`
+                <div class="ps-med">
+                  <span class="num">${i+1}.</span>
+                  <span><b>${escHtml(med.name)}</b>${med.usage ? `<span class="usage">${escHtml(med.usage)}</span>`:''}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="ps-sign-block">
+              ${rx.doctor.signature ? `<img class="ps-sign-img" src="${rx.doctor.signature}">` : ''}
+              <div class="ps-sign-line"></div>
+              <div class="ps-sign-name">${escHtml(rx.doctor.name)}</div>
+              ${rx.doctor.title ? `<div class="ps-sign-title">${escHtml(rx.doctor.title)}</div>` : ''}
+              <div class="ps-sign-address">${escHtml(addrLines)}</div>
+              <div class="ps-sign-date">${t.psDate}: ${formatDateBn(rx.date)}</div>
+            </div>
+          </div>
+        </div>
+
+        ${rx.adviceEnabled ? `
+        <div class="ps-advice">
+          <div class="do"><div class="ah">${t.doTitle}</div><div class="ps-text">${escHtml(rx.adviceDo)||'—'}</div></div>
+          <div class="dont"><div class="ah">${t.dontTitle}</div><div class="ps-text">${escHtml(rx.adviceDont)||'—'}</div></div>
+        </div>` : ''}
+
+        ${rx.followupEnabled && (rx.followupDate || rx.followupTime) ? `
+        <div class="ps-followup">
+          <div>
+            <div class="ah">${t.followupTitle}</div>
+            <div class="ps-followup-val">${rx.followupDate ? formatDateBn(rx.followupDate) : ''}${rx.followupTime ? ' — '+rx.followupTime : ''}</div>
+          </div>
+        </div>` : ''}
+      </div>
+
+      <div class="ps-footer-actions no-print">
+        <button class="btn" id="backBtn">${t.back}</button>
+        <button class="btn" id="newBtn">${t.newRx}</button>
+        <button class="btn" id="printBtn">${t.print}</button>
+      </div>
+      <div class="ps-footer-actions no-print" style="padding-top:0;">
+        <button class="btn primary" id="jpgBtn">${t.jpg}</button>
+        <button class="btn primary" id="pdfBtn">${t.pdf}</button>
+      </div>
+    </div>
+  `;
+  bindTopbar();
+  $('#backBtn').onclick = ()=>{ view='gallery'; render(); };
+  $('#newBtn').onclick = ()=>{ view='form'; render(); };
+  $('#printBtn').onclick = ()=>{ window.print(); };
+  $('#jpgBtn').onclick = ()=>downloadAs(rx, 'jpg', t);
+  $('#pdfBtn').onclick = ()=>downloadAs(rx, 'pdf', t);
+}
+
+async function downloadAs(rx, type, t){
+  const btn = type==='jpg' ? $('#jpgBtn') : $('#pdfBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = lang==='en' ? 'Generating...' : 'তৈরি হচ্ছে...';
+  try{
+    const el = document.querySelector('.print-sheet');
+    const canvas = await html2canvas(el, {scale:2, backgroundColor:'#FBF8F1', useCORS:true});
+    const safeName = (rx.patientName || 'prescription').replace(/[^\u0980-\u09FFa-zA-Z0-9]+/g,'-');
+    const fileBase = `prescription-${safeName}-${rx.date}`;
+    if(type==='jpg'){
+      const link = document.createElement('a');
+      link.download = fileBase + '.jpg';
+      link.href = canvas.toDataURL('image/jpeg', 0.95);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }else{
+      const { jsPDF } = window.jspdf;
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf = new jsPDF('p','mm','a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while(heightLeft > 0){
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+      pdf.save(fileBase + '.pdf');
+    }
+    showToast(type==='jpg' ? t.jpgDone : t.pdfDone);
+  }catch(e){
+    console.error(e);
+    showToast(t.downloadFail);
+  }
+  btn.disabled = false;
+  btn.textContent = original;
+}
+
+function escHtml(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+loadAll();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('service-worker.js').catch(e=>console.error('SW register failed', e));
+  });
+}
+</script>
+</body>
+</html>
